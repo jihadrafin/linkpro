@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkPro - Professional URL Shortener</title>
+  <style>
+    :root {
+      --primary: #0066cc;
+      --primary-dark: #004d99;
+      --secondary: #f8f9fa;
+      --text: #333;
+      --light-gray: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: var(--secondary);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      background-color: white;
+      padding: 1.2rem 2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .logo-icon {
+      font-size: 1.8rem;
+    }
+    
+    main {
+      max-width: 1000px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      flex: 1;
+    }
+    
+    .container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+    }
+    
+    .input-group {
+      display: flex;
+      margin-bottom: 1.5rem;
+    }
+    
+    input {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--light-gray);
+      border-radius: 4px 0 0 4px;
+      font-size: 1rem;
+      outline: none;
+    }
+    
+    input:focus {
+      border-color: var(--primary);
+    }
+    
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .advanced-options {
+      margin-bottom: 1.5rem;
+    }
+    
+    .advanced-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem 0;
+    }
+    
+    .advanced-panel {
+      padding: 1rem 0;
+      border-top: 1px solid var(--light-gray);
+      margin-top: 0.5rem;
+      display: none;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .custom-slug-input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--light-gray);
+      border-radius: 4px;
+      font-size: 1rem;
+      outline: none;
+    }
+    
+    .urls-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    
+    .urls-table th, .urls-table td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .urls-table th {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .short-url {
+      color: var(--primary);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    
+    .short-url:hover {
+      text-decoration: underline;
+    }
+    
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--primary);
+      font-size: 1.2rem;
+      padding: 0.2rem;
+      border-radius: 4px;
+    }
+    
+    .copy-btn:hover {
+      color: var(--primary-dark);
+    }
+    
+    .delete-btn {
+      color: var(--danger);
+    }
+    
+    .delete-btn:hover {
+      background-color: rgba(220, 53, 69, 0.1);
+    }
+    
+    .qr-btn:hover {
+      color: var(--primary-dark);
+    }
+    
+    .result {
+      padding: 1rem;
+      background-color: #f1f8ff;
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    
+    .success {
+      border-left: 4px solid var(--success);
+    }
+    
+    .error {
+      border-left: 4px solid var(--danger);
+    }
+    
+    .analytics-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: #666;
+      text-align: center;
+    }
+    
+    .charts-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .chart-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+    }
+    
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    
+    .canvas-container {
+      height: 250px;
+      position: relative;
+    }
+    
+    footer {
+      background-color: white;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: auto;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .footer-links {
+      margin-top: 0.5rem;
+    }
+    
+    .footer-links a {
+      color: var(--primary);
+      text-decoration: none;
+      margin: 0 0.5rem;
+    }
+    
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--light-gray);
+      margin-bottom: 1.5rem;
+    }
+    
+    .tab {
+      padding: 0.8rem 1.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .qr-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .qr-modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .qr-code {
+      margin: 1.5rem 0;
+    }
+    
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    
+    .close-modal {
+      background-color: var(--light-gray);
+      color: var(--text);
+      border: none;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    
+    .close-modal:hover {
+      background-color: #d1d5db;
+    }
+    
+    .download-qr {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+      margin-left: 0.5rem;
+    }
+    
+    .download-qr:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+      .input-group {
+        flex-direction: column;
+      }
+      
+      input, button {
+        width: 100%;
+        border-radius: 4px;
+      }
+      
+      button {
+        margin-top: 0.5rem;
+      }
+      
+      .analytics-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .charts-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <span class="logo-icon">🔗</span>
+      <span>LinkPro</span>
+    </div>
+  </header>
+  
+  <main>
+    <div class="container">
+      <div class="tabs">
+        <div class="tab active" data-tab="shorten">Shorten Link</div>
+        <div class="tab" data-tab="links">My Links</div>
+        <div class="tab" data-tab="analytics">Analytics</div>
+      </div>
+      
+      <div class="tab-content active" id="shorten-tab">
+        <h1>Create Shortened URL</h1>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="input-group">
+          <input type="url" id="original-url" placeholder="Enter your long URL here" required>
+          <button id="shorten-btn">Shorten</button>
+        </div>
+        
+        <div class="advanced-options">
+          <button class="advanced-toggle" id="advanced-toggle">
+            <span>Advanced Options</span>
+            <span>▼</span>
+          </button>
+          <div class="advanced-panel" id="advanced-panel">
+            <div class="form-group">
+              <label for="custom-slug">Custom Slug (optional)</label>
+              <input type="text" id="custom-slug" class="custom-slug-input" placeholder="e.g., my-product-launch">
+            </div>
+            <div class="form-group">
+              <label for="expiry-date">Expiry Date (optional)</label>
+              <input type="date" id="expiry-date" class="custom-slug-input">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="links-tab">
+        <h1>My Links</h1>
+        
+        <table class="urls-table">
+          <thead>
+            <tr>
+              <th>Short URL</th>
+              <th>Original URL</th>
+              <th>Created</th>
+              <th>Clicks</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="urls-list">
+            <!-- Links will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="tab-content" id="analytics-tab">
+        <h1>Analytics Dashboard</h1>
+        
+        <div class="analytics-container">
+          <div class="stat-card">
+            <div class="stat-value" id="total-links">0</div>
+            <div class="stat-label">Total Links</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="total-clicks">0</div>
+            <div class="stat-label">Total Clicks</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="avg-ctr">0%</div>
+            <div class="stat-label">Average CTR</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="active-links">0</div>
+            <div class="stat-label">Active Links</div>
+          </div>
+        </div>
+        
+        <div class="charts-container">
+          <div class="chart-card">
+            <div class="chart-title">Clicks Over Time</div>
+            <div class="canvas-container">
+              <canvas id="clicks-chart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Top Performing Links</div>
+            <div class="canvas-container">
+              <canvas id="top-links-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <div class="qr-modal" id="qr-modal">
+    <div class="qr-modal-content">
+      <h3 class="modal-title">QR Code for your Short Link</h3>
+      <div class="qr-code" id="qr-code"></div>
+      <div class="modal-buttons">
+        <button class="close-modal" id="close-modal">Close</button>
+        <button class="download-qr" id="download-qr">Download</button>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <div>© 2025 LinkPro - Professional URL Shortener</div>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Contact Us</a>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+  <script>
+    // DOM Elements
+    const originalUrlInput = document.getElementById('original-url');
+    const shortenBtn = document.getElementById('shorten-btn');
+    const resultElement = document.getElementById(' STANDARD_MODE');
+    const advancedToggle = document.getElementById('advanced-toggle');
+    const advancedPanel = document.getElementById('advanced-panel');
+    const customSlugInput = document.getElementById('custom-slug');
+    const expiryDateInput = document.getElementById('expiry-date');
+    const urlsList = document.getElementById('urls-list');
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const qrModal = document.getElementById('qr-modal');
+    const closeModal = document.getElementById('close-modal');
+    const downloadQr = document.getElementById('download-qr');
+    const qrCodeElement = document.getElementById('qr-code');
+    
+    // Statistics elements
+    const totalLinksElement = document.getElementById('total-links');
+    const totalClicksElement = document.getElementById('total-clicks');
+    const avgCtrElement = document.getElementById('avg-ctr');
+    const activeLinksElement = document.getElementById('active-links');
+    
+    // localStorage key
+    const STORAGE_KEY = 'linkpro_urls';
+    
+    // Base URL for short links
+    const BASE_URL = 'https://jihadrafin.github.io/linkpro/';
+    
+    // Store the current QR code URL
+    let currentQrUrl = '';
+    
+    // Load saved URLs from localStorage
+    let savedUrls = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    
+    // Initialize the app
+    function init() {
+      // Display saved URLs
+      displayUrls();
+      
+      // Update analytics
+      updateAnalytics();
+      
+      // Draw charts
+      drawCharts();
+    }
+    
+    // Toggle advanced options
+    advancedToggle.addEventListener('click', () => {
+      if (advancedPanel.style.display === 'block') {
+        advancedPanel.style.display = 'none';
+        advancedToggle.querySelector('span:last-child').textContent = '▼';
+      } else {
+        advancedPanel.style.display = 'block';
+        advancedToggle.querySelector('span:last-child').textContent = '▲';
+      }
+    });
+    
+    // Tab switching
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs
+        tabs.forEach(t => t.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        
+        // Show corresponding tab content
+        const tabId = tab.getAttribute('data-tab');
+        tabContents.forEach(content => {
+          content.classList.remove('active');
+          if (content.id === `${tabId}-tab`) {
+            content.classList.add('active');
+          }
+        });
+      });
+    });
+    
+    // Generate short URL
+    shortenBtn.addEventListener('click', () => {
+      const originalUrl = originalUrlInput.value.trim();
+      const customSlug = customSlugInput.value.trim();
+      const expiryDate = expiryDateInput.value ? new Date(expiryDateInput.value) : null;
+      
+      // Validate URL
+      if (!originalUrl || !isValidUrl(originalUrl)) {
+        showResult('Please enter a valid URL', 'error');
+        return;
+      }
+      
+      // Generate slug (either custom or random)
+      const slug = customSlug || generateRandomSlug(6);
+      
+      // Check if slug already exists
+      if (customSlug && savedUrls.some(url => url.slug === customSlug)) {
+        showResult('This custom slug is already in use. Please choose another one.', 'error');
+        return;
+      }
+      
+      // Create new URL object
+      const newUrl = {
+        id: Date.now().toString(),
+        originalUrl,
+        slug,
+        shortUrl: `${BASE_URL}${slug}`,
+        createdAt: new Date().toISOString(),
+        expiryDate: expiryDate ? expiryDate.toISOString() : null,
+        clicks: 0,
+        clicksHistory: []
+      };
+      
+      // Add to saved URLs
+      savedUrls.push(newUrl);
+      saveUrls();
+      
+      // Show result
+      showResult(`Your shortened URL has been created: <a href="${newUrl.shortUrl}" class="short-url" target="_blank">${newUrl.shortUrl}</a>`, 'success');
+      
+      // Clear inputs
+      originalUrlInput.value = '';
+      customSlugInput.value = '';
+      expiryDateInput.value = '';
+      
+      // Update UI
+      displayUrls();
+      updateAnalytics();
+      drawCharts();
+    });
+    
+    // Show result message
+    function showResult(message, type) {
+      resultElement.innerHTML = message;
+      resultElement.className = `result ${type}`;
+      resultElement.style.display = 'block';
+      
+      // Auto hide after 5 seconds
+      setTimeout(() => {
+        resultElement.style.display = 'none';
+      }, 5000);
+    }
+    
+    // Display URLs in the table
+    function displayUrls() {
+      urlsList.innerHTML = '';
+      
+      if (savedUrls.length === 0) {
+        urlsList.innerHTML = '<tr><td colspan="5" style="text-align: center;">No links created yet</td></tr>';
+        return;
+      }
+      
+      // Sort by creation date (newest first)
+      const sortedUrls = [...savedUrls].sort((a, b) => new PADDED_MODE
+      sortedUrls.forEach(url => {
+        const row = document.createElement('tr');
+        
+        // Check if URL is expired
+        const isExpired = url.expiryDate && new Date(url.expiryDate) < new Date();
+        const shortUrlDisplay = isExpired ? 
+          `<span style="color: #999; text-decoration: line-through;">${url.shortUrl}</span> (Expired)` : 
+          `<a href="${url.shortUrl}" class="short-url" target="_blank">${url.shortUrl}</a>`;
+        
+        row.innerHTML = `
+          <td>${shortUrlDisplay}</td>
+          <td>${truncateUrl(url.originalUrl, 30)}</td>
+          <td>${formatDate(url.createdAt)}</td>
+          <td>${url.clicks}</td>
+          <td>
+            <button class="action-btn copy-btn" data-url="${url.shortUrl}" title="Copy to clipboard">📋</button>
+            <button class="action-btn qr-btn" data-url="${url.shortUrl}" title="Generate QR code">📱</button>
+            <button class="action-btn delete-btn" data-id="${url.id}" title="Delete">🗑️</button>
+          </td>
+        `;
+        
+        urlsList.appendChild(row);
+      });
+      
+      // Add event listeners for action buttons
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const url = btn.getAttribute('data-url');
+          navigator.clipboard.writeText(url)
+            .then(() => {
+              showResult('URL copied to clipboard!', 'success');
+            })
+            .catch(err => {
+              showResult('Failed to copy URL', 'error');
+            });
+        });
+      });
+      
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (confirm('Are you sure you want to delete this shortened URL?')) {
+            // Remove URL from array
+            savedUrls = savedUrls.filter(url => url.id !== id);
+            saveUrls();
+            displayUrls();
+            updateAnalytics();
+            drawCharts();
+            showResult('URL deleted successfully', 'success');
+          }
+        });
+      });
+      
+      document.querySelectorAll('.qr-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const url = btn.getAttribute('data-url');
+          currentQrUrl = url;
+          showQrCode(url);
+        });
+      });
+    }
+    
+    // Show QR code modal
+    function showQrCode(url) {
+      // Clear previous QR code
+      qrCodeElement.innerHTML = '';
+      
+      // Generate QR code
+      new QRCode(qrCodeElement, {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: "#0066cc",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      
+      // Show modal
+      qrModal.style.display = 'flex';
+    }
+    
+    // Close QR code modal
+    closeModal.addEventListener('click', () => {
+      qrModal.style.display = 'none';
+    });
+    
+    // Download QR code
+    downloadQr.addEventListener('click', () => {
+      const canvas = qrCodeElement.querySelector('canvas');
+      if (canvas) {
+        const imageUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = 'qrcode.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    });
+    
+    // Close modal when clicking outside
+    qrModal.addEventListener('click', (e) => {
+      if (e.target === qrModal) {
+        qrModal.style.display = 'none';
+      }
+    });
+    
+    // Update analytics dashboard
+    function updateAnalytics() {
+      const currentDate = new Date();
+      
+      // Calculate statistics
+      const totalLinks = savedUrls.length;
+      const totalClicks = savedUrls.reduce((sum, url) => sum + url.clicks, 0);
+      const avgCtr = totalLinks > 0 ? ((totalClicks / totalLinks) * 100).toFixed(1) : 0;
+      const activeLinks = savedUrls.filter(url => !url.expiryDate || new Date(url.expiryDate) > currentDate).length;
+      
+      // Update DOM
+      totalLinksElement.textContent = totalLinks;
+      totalClicksElement.textContent = totalClicks;
+      avgCtrElement.textContent = `${avgCtr}%`;
+      activeLinksElement.textContent = activeLinks;
+    }
+    
+    // Draw analytics charts
+    function drawCharts() {
+      drawClicksChart();
+      drawTopLinksChart();
+    }
+    
+    // Draw clicks over time chart
+    function drawClicksChart() {
+      const ctx = document.getElementById('clicks-chart').getContext('2d');
+      
+      // Generate last 7 days dates
+      const dates = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        dates.push(date);
+      }
+      
+      // Mock data for demonstration
+      const clicksData = dates.map((date, index) => {
+        // Generate random click count (5-30)
+        return 5 + Math.floor(Math.random() * 25);
+      });
+      
+      // Format dates for display
+      const formattedDates = dates.map(date => {
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      });
+      
+      // Create chart
+      if (window.clicksChart) {
+        window.clicksChart.destroy();
+      }
+      
+      window.clicksChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: formattedDates,
+          datasets: [{
+            label: 'Clicks',
+            data: clicksData,
+            backgroundColor: 'rgba(0, 102, 204, 0.1)',
+            borderColor: 'rgba(0, 102, 204, 1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: true,
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Draw top performing links chart
+    function drawTopLinksChart() {
+      const ctx = document.getElementById('top-links-chart').getContext('2d');
+      
+      // Sort URLs by clicks (descending)
+      const topLinks = [...savedUrls]
+        .sort((a, b) => b.clicks - a.clicks)
+        .slice(0, 5);
+      
+      // If no links, don't draw chart
+      if (topLinks.length === 0) return;
+      
+      // For demonstration, assign random clicks if none exist
+      topLinks.forEach(link => {
+        if (link.clicks === 0) {
+          link.clicks = Math.floor(Math.random() * 40) + 5;
+        }
+      });
+      
+      // Create chart
+      if (window.topLinksChart) {
+        window.topLinksChart.destroy();
+      }
+      
+      window.topLinksChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: topLinks.map(link => link.slug),
+          datasets: [{
+            label: 'Clicks',
+            data: topLinks.map(link => link.clicks),
+            backgroundColor: 'rgba(0, 102, 204, 0.7)',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: true,
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Utility Functions
+    function isValidUrl(url) {
+      try {
+        new URL(url);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+    
+    function generateRandomSlug(length) {
+      const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let slug = '';
+      for (let i = 0; i < length; i++) {
+        slug += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return slug;
+    }
+    
+    function saveUrls() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedUrls));
+    }
+    
+    function truncateUrl(url, maxLength) {
+      if (url.length <= maxLength) return url;
+      return url.substring(0, maxLength - 3) + '...';
+    }
+    
+    function formatDate(isoString) {
+      const date = new Date(isoString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+    
+    // Initialize the app
+    init();
+  </script>
+</body>
+</html>
